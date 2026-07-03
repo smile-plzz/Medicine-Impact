@@ -1,0 +1,6 @@
+{
+  "name": "Medicine Impact",
+  "description": "Visualize how medications affect different parts of the human body.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
