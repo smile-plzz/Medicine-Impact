@@ -10,3 +10,27 @@
 body {
   @apply bg-[#0A0A0B] text-gray-200 font-sans antialiased;
 }
+
+/* The dashboard is designed as a dark terminal theme, which is illegible and
+   wastes ink when printed as-is. Flatten it to plain light-on-white for the
+   Print Report button, and hide chrome that only makes sense on screen
+   (nav/search, tab switcher, persona switcher, export buttons, hover hints). */
+@media print {
+  * {
+    background: transparent !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    border-color: #d1d5db !important;
+  }
+}

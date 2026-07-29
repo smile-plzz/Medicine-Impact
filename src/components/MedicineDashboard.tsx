@@ -23,18 +23,20 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
       
       {/* Header Card */}
       <div className="bg-gray-900/40 backdrop-blur-md rounded-xl p-6 md:p-8 shadow-[0_0_20px_rgba(34,211,238,0.05)] border border-cyan-500/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative">
-        <div className="absolute top-6 right-6 flex items-center gap-2 hidden md:flex">
-          <button 
+        <div className="print:hidden absolute top-6 right-6 flex items-center gap-2 hidden md:flex">
+          <button
             onClick={() => window.print()}
             className="p-2 text-cyan-500/50 hover:text-cyan-400 hover:bg-cyan-500/10 rounded transition-all"
             title="Print Report"
+            aria-label="Print report"
           >
             <Printer className="w-5 h-5" />
           </button>
-          <button 
+          <button
             onClick={() => exportToMarkdown(data)}
             className="p-2 text-blue-500 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-all shadow-[0_0_10px_rgba(59,130,246,0.2)]"
             title="Export as Markdown"
+            aria-label="Export report as Markdown"
           >
             <Download className="w-5 h-5" />
           </button>
@@ -70,7 +72,7 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1.5 bg-gray-900/60 rounded border border-gray-800 w-fit">
+      <div className="print:hidden flex overflow-x-auto hide-scrollbar gap-2 p-1.5 bg-gray-900/60 rounded border border-gray-800 w-fit">
         {(['overview', 'body', 'interactions', 'timeline', 'overdose'] as const).map(tab => (
           <button
             key={tab}
@@ -149,14 +151,13 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
         {/* Right Column: Dynamic Content based on Tabs */}
         <div className="lg:col-span-2 space-y-6">
           
-          {activeTab === 'overview' && (
-            <>
-              <div className="bg-cyan-950/20 rounded-xl p-6 border border-cyan-900/50 relative shadow-[inset_0_0_20px_rgba(34,211,238,0.02)]">
+          <div className={activeTab === 'overview' ? '' : 'hidden print:block'}>
+              <div className="bg-cyan-950/20 rounded-xl p-6 border border-cyan-900/50 relative shadow-[inset_0_0_20px_rgba(34,211,238,0.02)] print:break-inside-avoid">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                   <h3 className="text-sm font-mono text-cyan-400 flex items-center gap-2 uppercase tracking-widest">
                     <Info className="w-4 h-4" /> SYNTHESIS PROTOCOL
                   </h3>
-                  <div className="flex bg-gray-950/80 p-1 rounded border border-gray-800 overflow-x-auto max-w-full">
+                  <div className="print:hidden flex bg-gray-950/80 p-1 rounded border border-gray-800 overflow-x-auto max-w-full">
                     {(['patient', 'student', 'doctor', 'researcher'] as const).map(p => (
                       <button
                         key={p}
@@ -175,7 +176,7 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                 </div>
               </div>
 
-              <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800">
+              <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 print:break-inside-avoid">
                 <h3 className="text-sm font-mono text-purple-400 mb-4 flex items-center gap-2 uppercase tracking-widest">
                   <Pill className="w-4 h-4" /> MECHANISM OF ACTION
                 </h3>
@@ -183,11 +184,10 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                   {data.summary.mechanism}
                 </p>
               </div>
-            </>
-          )}
+          </div>
 
-          {activeTab === 'body' && (
-            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 min-h-[500px] relative">
+          <div className={activeTab === 'body' ? '' : 'hidden print:block'}>
+            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 min-h-[500px] relative print:min-h-0 print:break-inside-avoid">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <Activity className="w-48 h-48 text-cyan-500" />
               </div>
@@ -280,10 +280,10 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          {activeTab === 'interactions' && (
-            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800">
+          <div className={activeTab === 'interactions' ? '' : 'hidden print:block'}>
+            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 print:break-inside-avoid">
               <h3 className="text-sm font-mono text-cyan-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
                 <FileText className="w-4 h-4" /> CROSS-REACTIONS
               </h3>
@@ -316,10 +316,10 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                 )}
               </div>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'timeline' && (
-            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 relative overflow-hidden">
+          <div className={activeTab === 'timeline' ? '' : 'hidden print:block'}>
+            <div className="bg-gray-900/40 rounded-xl p-6 shadow-sm border border-gray-800 relative overflow-hidden print:break-inside-avoid">
                <h3 className="text-sm font-mono text-cyan-400 mb-8 flex items-center gap-2 uppercase tracking-widest">
                 <Clock className="w-4 h-4" /> TEMPORAL PROGRESSION
               </h3>
@@ -334,10 +334,10 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                 ))}
               </div>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'overdose' && (
-            <div className="bg-red-950/20 rounded-xl p-6 border border-red-900/50 shadow-[inset_0_0_30px_rgba(248,113,113,0.05)] relative overflow-hidden">
+          <div className={activeTab === 'overdose' ? '' : 'hidden print:block'}>
+            <div className="bg-red-950/20 rounded-xl p-6 border border-red-900/50 shadow-[inset_0_0_30px_rgba(248,113,113,0.05)] relative overflow-hidden print:break-inside-avoid">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <AlertTriangle className="w-48 h-48 text-red-500" />
               </div>
@@ -372,7 +372,7 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
         </div>
       </div>

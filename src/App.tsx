@@ -57,7 +57,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 text-gray-200">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-gray-800/50">
+      <nav className="print:hidden sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 font-display font-bold text-lg tracking-tight shrink-0">
             <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.4)]">
@@ -81,9 +81,10 @@ export default function App() {
               disabled={loading}
             />
             {query && !loading && (
-              <button 
+              <button
                 type="button"
                 onClick={() => { setQuery(''); setData(null); setError(null); }}
+                aria-label="Clear search"
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-cyan-400 transition-colors"
               >
                 ✕
@@ -165,7 +166,7 @@ export default function App() {
       </main>
       
       {/* Disclaimer */}
-      <footer className="py-8 text-center text-[10px] font-mono text-gray-600 px-4 max-w-3xl mx-auto mt-auto uppercase tracking-widest relative z-10">
+      <footer className="py-8 text-center text-[11px] font-mono text-gray-500 px-4 max-w-3xl mx-auto mt-auto uppercase tracking-widest relative z-10">
         // EDUCATIONAL USE ONLY // NOT FOR MEDICAL DIAGNOSIS // CONSULT QUALIFIED PROFESSIONALS
       </footer>
     </div>
