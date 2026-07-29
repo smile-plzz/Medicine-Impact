@@ -4,6 +4,13 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import Database from "better-sqlite3";
 
+if (!process.env.GEMINI_API_KEY) {
+  console.error(
+    "Missing GEMINI_API_KEY. Set it in your .env file (see .env.example) before starting the server."
+  );
+  process.exit(1);
+}
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const db = new Database("medicine_impact.db");
 
@@ -25,7 +32,7 @@ db.exec(`
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
   app.use(express.json());
 
@@ -51,34 +58,48 @@ async function startServer() {
         return res.json(JSON.parse(cached.data));
       }
       
-      let rxNavContext = "";
-      try {
-        const queryName = medicineName.split(' ')[0]; // Basic way to get first term
-        const rxNavRes = await fetch(`https://rxnav.nlm.nih.gov/REST/drugs.json?name=${encodeURIComponent(queryName)}`);
-        if (rxNavRes.ok) {
-          const rxNavData = await rxNavRes.json();
-          if (rxNavData.drugGroup?.conceptGroup) {
-            rxNavContext = `\n\nData from RxNav API for ${queryName}: Found related concepts.`;
-          }
-        }
-      } catch (err) {
-        console.error("RxNav fetch failed", err);
-      }
+      // Split multi-drug queries (e.g. "lisinopril + advil", "aspirin vs ibuprofen")
+      // into individual drug terms so context lookups aren't limited to the first drug.
+      const drugTerms = [
+        ...new Set(
+          medicineName
+            .split(/\s*(?:\+|,|\bvs\.?\b)\s*/)
+            .map(term => term.split(' ')[0])
+            .filter(Boolean)
+        ),
+      ].slice(0, 3);
 
+      let rxNavContext = "";
       let fdaContext = "";
-      try {
-        const queryName = medicineName.split(' ')[0]; // Basic way to get first term
-        const fdaRes = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${queryName}"+openfda.generic_name:"${queryName}"&limit=1`);
-        if (fdaRes.ok) {
-          const fdaData = await fdaRes.json();
-          if (fdaData.results && fdaData.results.length > 0) {
-            const result = fdaData.results[0];
-            fdaContext = `\n\nData from OpenFDA API for ${queryName}:\n- Boxed Warning: ${result.boxed_warning?.[0] || 'None'}\n- Adverse Reactions: ${result.adverse_reactions?.[0] || 'Unknown'}\n- Drug Interactions: ${result.drug_interactions?.[0] || 'Unknown'}\n- Overdosage: ${result.overdosage?.[0] || 'Unknown'}\n\n`;
+
+      await Promise.all(
+        drugTerms.map(async (queryName) => {
+          try {
+            const rxNavRes = await fetch(`https://rxnav.nlm.nih.gov/REST/drugs.json?name=${encodeURIComponent(queryName)}`);
+            if (rxNavRes.ok) {
+              const rxNavData = await rxNavRes.json();
+              if (rxNavData.drugGroup?.conceptGroup) {
+                rxNavContext += `\n\nData from RxNav API for ${queryName}: Found related concepts.`;
+              }
+            }
+          } catch (err) {
+            console.error("RxNav fetch failed", err);
           }
-        }
-      } catch (err) {
-        console.error("OpenFDA fetch failed", err);
-      }
+
+          try {
+            const fdaRes = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${queryName}"+openfda.generic_name:"${queryName}"&limit=1`);
+            if (fdaRes.ok) {
+              const fdaData = await fdaRes.json();
+              if (fdaData.results && fdaData.results.length > 0) {
+                const result = fdaData.results[0];
+                fdaContext += `\n\nData from OpenFDA API for ${queryName}:\n- Boxed Warning: ${result.boxed_warning?.[0] || 'None'}\n- Adverse Reactions: ${result.adverse_reactions?.[0] || 'Unknown'}\n- Drug Interactions: ${result.drug_interactions?.[0] || 'Unknown'}\n- Overdosage: ${result.overdosage?.[0] || 'Unknown'}\n\n`;
+              }
+            }
+          } catch (err) {
+            console.error("OpenFDA fetch failed", err);
+          }
+        })
+      );
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',

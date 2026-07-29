@@ -8,6 +8,21 @@ interface HumanBodyProps {
   onSystemSelect: (system: string) => void;
 }
 
+// Systems the SVG silhouette below has a dedicated shape for. Any effect
+// reported for a system outside this list has no anatomical click target,
+// so it's surfaced separately as a chip (see "Other Systems" below).
+const ANATOMICAL_SYSTEMS = [
+  'Brain', 'Eyes', 'Lungs', 'Heart', 'Liver', 'Stomach', 'Kidneys', 'Intestines', 'Pancreas',
+];
+
+const getSeverityBadgeClass = (severity: number) => {
+  if (severity === 0) return 'bg-gray-100 border-gray-200 text-gray-500';
+  if (severity <= 3) return 'bg-yellow-200 border-yellow-300 text-yellow-900';
+  if (severity <= 6) return 'bg-orange-400 border-orange-500 text-orange-950';
+  if (severity <= 8) return 'bg-red-500 border-red-600 text-white';
+  return 'bg-red-700 border-red-800 text-white';
+};
+
 const getSeverityColor = (severity: number) => {
   if (severity === 0) return 'fill-gray-100 hover:fill-gray-200';
   if (severity <= 3) return 'fill-yellow-200 hover:fill-yellow-300';
@@ -18,6 +33,10 @@ const getSeverityColor = (severity: number) => {
 
 export const HumanBodySVG: React.FC<HumanBodyProps> = ({ effects, selectedSystem, onSystemSelect }) => {
   const [hoveredSystem, setHoveredSystem] = useState<string | null>(null);
+
+  const otherSystemEffects = effects.filter(
+    e => !ANATOMICAL_SYSTEMS.some(s => s.toLowerCase() === e.system.toLowerCase())
+  );
 
   const getSystemSeverity = (systemName: string) => {
     const effect = effects.find(e => e.system.toLowerCase() === systemName.toLowerCase());
@@ -45,8 +64,9 @@ export const HumanBodySVG: React.FC<HumanBodyProps> = ({ effects, selectedSystem
   };
 
   return (
+    <>
     <div className="relative w-full max-w-sm mx-auto aspect-[1/2.2] bg-gradient-to-b from-slate-50 to-gray-100 rounded-3xl p-6 flex flex-col items-center justify-center shadow-inner border border-gray-200/50">
-      
+
       {/* Tooltip Header */}
       <div className="absolute top-4 left-0 right-0 flex justify-center h-8 pointer-events-none">
         {hoveredSystem ? (
@@ -118,5 +138,23 @@ export const HumanBodySVG: React.FC<HumanBodyProps> = ({ effects, selectedSystem
         </div>
       </div>
     </div>
+
+    {/* Systems without a dedicated anatomical shape above (e.g. Skin, Blood, Immune System) */}
+    {otherSystemEffects.length > 0 && (
+      <div className="flex flex-wrap justify-center gap-2 mt-4">
+        {otherSystemEffects.map(effect => (
+          <button
+            key={effect.system}
+            onClick={() => onSystemSelect(effect.system)}
+            onMouseEnter={() => setHoveredSystem(effect.system)}
+            onMouseLeave={() => setHoveredSystem(null)}
+            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all ${getSeverityBadgeClass(effect.severity)} ${isSelected(effect.system) ? 'ring-2 ring-blue-500 ring-offset-1' : ''}`}
+          >
+            {effect.system}
+          </button>
+        ))}
+      </div>
+    )}
+    </>
   );
 };

@@ -1,7 +1,8 @@
 {
-  "name": "react-example",
+  "name": "medicine-impact-simulator",
+  "description": "AI-powered medical intelligence platform that visualizes how medications affect the human body.",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
