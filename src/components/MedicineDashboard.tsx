@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MedicineData } from '../types';
 import { HumanBodySVG } from './HumanBodySVG';
 import { Activity, AlertTriangle, Info, ShieldAlert, FileText, Pill, Clock, Download, Printer } from 'lucide-react';
@@ -9,6 +9,19 @@ export const MedicineDashboard: React.FC<{ data: MedicineData }> = ({ data }) =>
   const [activeTab, setActiveTab] = useState<'overview' | 'body' | 'interactions' | 'timeline' | 'overdose'>('overview');
   const [selectedSystem, setSelectedSystem] = useState<string | null>(null);
   const [persona, setPersona] = useState<'patient' | 'student' | 'doctor' | 'researcher'>('patient');
+
+  // Every new search replaces `data` but keeps this component mounted, so
+  // without this the body map/tab would stay on whatever system (or nothing)
+  // was selected for the previous drug. Default to the highest-severity
+  // system so the most important finding is visible immediately.
+  useEffect(() => {
+    if (data.bodySystemEffects.length > 0) {
+      const highestRisk = [...data.bodySystemEffects].sort((a, b) => b.severity - a.severity)[0];
+      setSelectedSystem(highestRisk.system);
+    } else {
+      setSelectedSystem(null);
+    }
+  }, [data]);
 
   const riskData = [
     { name: 'Liver', risk: getRiskScore(data.riskClassifications.liverToxicity.level), info: data.riskClassifications.liverToxicity },

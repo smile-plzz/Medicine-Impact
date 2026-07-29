@@ -18,5 +18,17 @@ export default defineConfig(() => {
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // recharts (and its d3 dependencies) is the bulk of the bundle and
+          // is only needed once medicine data loads, so split it out of the
+          // main chunk instead of shipping it on first paint.
+          manualChunks: {
+            charts: ['recharts'],
+          },
+        },
+      },
+    },
   };
 });

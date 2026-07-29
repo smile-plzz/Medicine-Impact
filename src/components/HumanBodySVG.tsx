@@ -56,10 +56,21 @@ export const HumanBodySVG: React.FC<HumanBodyProps> = ({ effects, selectedSystem
   const createProps = (systemName: string) => {
     const severity = getSystemSeverity(systemName);
     return {
-      className: `transition-all duration-300 cursor-pointer stroke-gray-600 stroke-[1.5px] ${getSeverityColor(severity)} ${getSeverityAnimation(severity)} ${isSelected(systemName) ? 'stroke-cyan-400 stroke-[3px] drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]' : ''}`,
+      className: `transition-all duration-300 cursor-pointer stroke-gray-600 stroke-[1.5px] outline-none ${getSeverityColor(severity)} ${getSeverityAnimation(severity)} ${isSelected(systemName) ? 'stroke-cyan-400 stroke-[3px] drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]' : 'focus-visible:stroke-cyan-300 focus-visible:stroke-[3px]'}`,
       onClick: () => onSystemSelect(systemName),
       onMouseEnter: () => setHoveredSystem(systemName),
       onMouseLeave: () => setHoveredSystem(null),
+      onFocus: () => setHoveredSystem(systemName),
+      onBlur: () => setHoveredSystem(null),
+      onKeyDown: (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSystemSelect(systemName);
+        }
+      },
+      tabIndex: 0,
+      role: 'button',
+      'aria-label': `${systemName}, severity ${severity} out of 10`,
     };
   };
 
@@ -148,7 +159,7 @@ export const HumanBodySVG: React.FC<HumanBodyProps> = ({ effects, selectedSystem
             onClick={() => onSystemSelect(effect.system)}
             onMouseEnter={() => setHoveredSystem(effect.system)}
             onMouseLeave={() => setHoveredSystem(null)}
-            className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest border transition-all ${getSeverityBadgeClass(effect.severity)} ${isSelected(effect.system) ? 'ring-1 ring-cyan-400/70' : ''}`}
+            className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest border transition-all outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${getSeverityBadgeClass(effect.severity)} ${isSelected(effect.system) ? 'ring-1 ring-cyan-400/70' : ''}`}
           >
             {effect.system}
           </button>
